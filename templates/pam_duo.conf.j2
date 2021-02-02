@@ -1,0 +1,25 @@
+; Duo Security PAM configuration
+;
+; {{ ansible_managed }}
+;
+
+[duo]
+autopush = {{ duo_autopush|default:'no' }}
+failmode = {{ duo_failmode|default:'safe' }}
+fallback_local_ip = {{ duo_fallback_local_ip|default:'no' }}
+host = {{ duo_api_hostname }}
+https_timeout = {{ duo_https_timeout|default:'0' }}
+ikey = {{ duo_integration_key }}
+motd = {{ duo_motd|default:'no' }}
+prompts = {{ duo_prompts|default:'3' }}
+pushinfo = {{ duo_pushinfo|default:'no' }}
+skey = {{ duo_secret_key }}
+
+{% if duo_groups %}
+groups = {{ duo_groups }}
+{% endif %}
+
+{% if duo_http_proxy %}
+http_proxy = {{ duo_http_proxy }}
+{% endif %}
+

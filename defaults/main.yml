@@ -1,2 +1,56 @@
 ---
-# defaults file for 2faduo
+# defaults for Duo related variables
+
+##
+# Required config
+##
+
+# The integration and secret key should be stored in Ansible Vault
+#   and passed in when the role is invoked
+duo_integration_key: "obtained-from-Duo"
+duo_secret_key: "obtained-from-Duo"
+duo_host: "{{ inventory_hostname }}"
+
+
+
+##
+# Optional config
+#
+# Information on the options can be found here:
+# https://duo.com/docs/duounix#duo-configuration-options
+##
+
+# Automatically send a push login request to the user's phone
+duo_autopush: "no"
+
+# Service or configuration errors will not prevent Duo authentication
+duo_failmode: "safe"
+
+# When "yes", if Duo Unix cannot detect the IP address of the client,
+# Duo Unix will send the IP address of the server it is running on.
+duo_fallback_local_ip: "no"
+
+# Number of seconds to wait for HTTPS responses from Duo Security
+#   0 disables the timeout
+duo_https_timeout: "0"
+
+# When "yes", prints /etc/motd to the screen after successful login
+duo_motd: "no"
+
+# Maximum number of times Duo Unix will prompt the user to authenticate
+#   when the second factor fails
+duo_prompts: "3"
+
+# When "yes", includes information such as the command being executed
+#   in the Duo Push message
+duo_pushinfo: "no"
+
+# If specified, Duo authentication is required only for the users in the
+# groups specified, unless a group is negated (!)
+#
+# duo_groups: "comma-separated-list-of-groups"
+
+# HTTP proxy to use, including authentication if needed
+#
+# duo_http_proxy: http://username:password@proxy.example.com:8080
+
