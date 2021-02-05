@@ -1,6 +1,8 @@
 paulrentschler.duo
 ==================
 
+[![MIT licensed][mit-badge]][mit-link]
+
 Installs and configures Duo Security's Duo Unix with Pluggable Authentication Modules (PAM) support via the `pam_duo` module on Ubuntu Linux.
 
 It does **not** use the `login_duo` module although an [Ansible role to do that does exist](https://github.com/jlafon/ansible-duo-security).
@@ -110,10 +112,14 @@ More complicated example that specifies more parameters including specifying the
 License
 -------
 
-MIT
+[MIT][mit-link]
 
 
 Author Information
 ------------------
 
 Created by Paul Rentschler in 2021.
+
+
+[mit-badge]: https://img.shields.io/badge/license-MIT-blue.svg
+[mit-link]: https://github.com/paulrentschler/ansible-role-duo/blob/master/LICENSE
