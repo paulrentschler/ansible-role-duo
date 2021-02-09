@@ -57,125 +57,57 @@
   notify: duo restart sshd
 
 - name: configure PAM
-  when: not duo_pam_manual_config|bool|default(true)
+  when: not duo_pam_manual_config|bool
   become: yes
   block:
-    - name: check for /etc/pam.d/common-auth-duo
-      ansible.builtin.stat:
-        path: /etc/pam.d/common-auth-duo
-      register: common_auth_duo_file
-
     - name: create /etc/pam.d/common-auth-duo
-      ansible.builtin.copy:
-        src: /etc/pam.d/common-auth
+      ansible.builtin.template:
+        src: common-auth-duo.j2
         dest: /etc/pam.d/common-auth-duo
-        remote_src: yes
-        owner: root
-        group: root
-        mode: 0644
-      when: not (common_auth_duo_file.stat.exists is defined and common_auth_duo_file.stat.exists)
-
-    - name: backup /etc/pam.d/common-auth-duo
-      ansible.builtin.copy:
-        src: /etc/pam.d/common-auth-duo
-        dest: /etc/pam.d/common-auth-duo.bak
-        remote_src: yes
         owner: root
         group: root
         mode: 0644
 
-    # determine if krb5 is in use
-    - name: determine if krb5.so is in use
+    - name: configure Duo for use with login
       ansible.builtin.lineinfile:
-        dest: /etc/pam.d/common-auth-duo
-        regexp: ".*krb5.so.*"
-        state: absent
-      check_mode: yes
-      register: krb5_in_use
-      changed_when: false
+        dest: /etc/pam.d/login
+        state: present
+        regexp: "^#?\@include common-auth"
+        line: "@include common-auth-duo"
+        create: no
+      when: duo_pam_use_login|bool
 
+    - name: configure Duo for use with other authentication needs
+      ansible.builtin.lineinfile:
+        dest: /etc/pam.d/other
+        state: present
+        regexp: "^#?\@include common-auth"
+        line: "@include common-auth-duo"
+        create: no
+      when: duo_pam_use_other|bool
 
-    ### TODO: rethink how to automate the PAM configuration
-    #
-    # The issue is that one wrong change with lineinfile could create a
-    # completely insecure server that allows access to users without a
-    # password or who fail authentication instead of pass it!
-    #
-    # Consider using variable switches to determine IF the PAM configs should
-    # be updated and then provide several versions of how those files could
-    # be updated either using different templates or a single template with
-    # a lot of variables to control what gets configured (first might be a
-    # better, more extensible option)
-    #
-    # Include an option for building on a custom PAM configuration specified
-    # by the `paulrentschler.security` role.
-    #
-    # Consider including an option in the `paulrentschler.security` role that
-    # can configure Duo 2FA with PAM so this role would be run first with the
-    # manual config option, then `paulrentschler.security` would be run
-    # indicating that Duo is already installed so it is included
-    # in the PAM config.
-    #
-    #
-    # Existing roles for ideas:
-    #   * https://github.com/hurricanehrndz/ansible-yubikey
-    #   * https://github.com/fgci-org/ansible-role-pam
-    #
-    # Ansible PAM-related modules:
-    #   * https://docs.ansible.com/ansible/latest/collections/community/general/pamd_module.html
-    #   * https://docs.ansible.com/ansible/latest/collections/community/general/pam_limits_module.html
-    #
+    - name: configure Duo for use with sshd
+      ansible.builtin.lineinfile:
+        dest: /etc/pam.d/sshd
+        state: present
+        regexp: "^#?\@include common-auth"
+        line: "@include common-auth-duo"
+        create: no
+      when: duo_pam_use_ssh|bool
 
-    # - include_tasks: pam_without_krb5.yml
-    # ## if not krb5
-    # # comment the existing pam_unix.so line
-    # # add the new pam_unix.so requisite line
-    # # add the pam_duo.so line
-    #   when: not krb5_in_use.found
-
-    # - include_tasks: pam_with_krb5.yml
-    # ## if krb5
-    # # comment the existing pam_krb5.so line
-    # # add the new pam_krb5.so requisite line
-    # # add the pam_duo.so line
-    #   when: krb5_in_use.found
-
-
-
-  rescue:
-    # if something goes wrong, the backup file is used to restore the
-    # /etc/pam.d/common-auth-duo file to what should be a working state
-    - name: restore /etc/pam.d/common-auth-duo
-      ansible.builtin.copy:
-        src: /etc/pam.d/common-auth-duo.bak
-        dest: /etc/pam.d/common-auth-duo
-        remote_src: yes
-        owner: root
-        group: root
-        mode: 0644
-  always:
-    # since a backup of /etc/pam.d/common-auth-duo is created every time
-    # it makes no sense to keep it around if no changes are made to the
-    # file; thus if they are the same, the backup is deleted
-    - name: check for differences in the backup file
-      ansible.builtin.command: diff common-auth-duo common-auth-duo.bak
-      args:
-        chdir: /etc/pam.d/
-      register: common_auth_duo_diff
-      changed_when: "common_auth_duo_diff.rc > 0"
-      failed_when: "common_auth_duo_diff.rc > 1"
-    - name: remove unneeded /etc/pam.d/common-auth-duo backup
-      ansible.builtin.file:
-        path: /etc/pam.d/common-auth-duo.bak
-        state: absent
-      when: not (common_auth_duo_diff.changed is defined and common_auth_duo_diff.changed)
-
-
+    - name: configure Duo for use with sudo
+      ansible.builtin.lineinfile:
+        dest: /etc/pam.d/sudo
+        state: present
+        regexp: "^#?\@include common-auth"
+        line: "@include common-auth-duo"
+        create: no
+      when: duo_pam_use_sudo|bool
 
 - name: configure PAM manually
   debug:
     msg: "Duo Unix via PAM must be configured manually to avoid creating an insecure host."
-  when: duo_pam_manual_config|bool|default(true)
+  when: duo_pam_manual_config|bool
 
   ### NOTE: Some useful information on PAM
   #
@@ -184,10 +116,5 @@
   #
   # General intro and overview of PAM
   #   https://documentation.suse.com/sled/15-SP1/html/SLED-all/cha-pam.html
-  #
-  # Locking accounts with pam-tally2 and pam-faillock
-  #   http://asystemengineersnotebook.blogspot.com/2016/09/locking-user-accounts-with-pam-faillock.html
-  #   - pam-faillock does not appear to be installed on Ubuntu but pam-tally2 is
-  #   - it is arguable which is better (both claim to be)
   #
 

@@ -36,6 +36,35 @@ The fully-qualified host name of the host.
     duo_host: "{{ inventory_hostname }}"
 
 
+### Implementation settings
+
+These settings determine which PAM services, if any, are configured to use Duo for two-factor authentication. The automatic implementation configures Duo to be used with the default Ubuntu PAM authentication configuration which only uses local unix authentication.
+
+Do not configure PAM for use of Duo, but rather allow it to be done manually by setting this value to `yes`.
+
+    duo_pam_manual_config: no
+
+Path to the Duo PAM module.
+
+    duo_pam_module_path: /lib64/security/pam_duo.so
+
+Configure the PAM login service to use Duo for 2FA.
+
+    duo_pam_use_login: yes
+
+Configure the PAM other login service to use Duo for 2FA.
+
+    duo_pam_use_other: no
+
+Configure the PAM ssh service to use Duo for 2FA.
+
+    duo_pam_use_ssh: yes
+
+Configure the PAM sudo service to use Duo for 2FA.
+
+    duo_pam_use_sudo: no
+
+
 ### Optional configuration settings
 
 Additional information on the options below can be found [in the Duo documentation](https://duo.com/docs/duounix#duo-configuration-options).
