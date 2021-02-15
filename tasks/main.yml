@@ -55,6 +55,7 @@
     - key: "UseDNS"
       value: "no"
   notify: duo restart sshd
+  become: yes
 
 - name: configure PAM
   when: not duo_pam_manual_config|bool
@@ -72,7 +73,7 @@
       ansible.builtin.lineinfile:
         dest: /etc/pam.d/login
         state: present
-        regexp: "^#?\@include common-auth"
+        regexp: "^#?@include common-auth"
         line: "@include common-auth-duo"
         create: no
       when: duo_pam_use_login|bool
@@ -81,7 +82,7 @@
       ansible.builtin.lineinfile:
         dest: /etc/pam.d/other
         state: present
-        regexp: "^#?\@include common-auth"
+        regexp: "^#?@include common-auth"
         line: "@include common-auth-duo"
         create: no
       when: duo_pam_use_other|bool
@@ -90,7 +91,7 @@
       ansible.builtin.lineinfile:
         dest: /etc/pam.d/sshd
         state: present
-        regexp: "^#?\@include common-auth"
+        regexp: "^#?@include common-auth"
         line: "@include common-auth-duo"
         create: no
       when: duo_pam_use_ssh|bool
@@ -99,7 +100,7 @@
       ansible.builtin.lineinfile:
         dest: /etc/pam.d/sudo
         state: present
-        regexp: "^#?\@include common-auth"
+        regexp: "^#?@include common-auth"
         line: "@include common-auth-duo"
         create: no
       when: duo_pam_use_sudo|bool
