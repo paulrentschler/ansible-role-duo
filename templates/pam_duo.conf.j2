@@ -4,22 +4,22 @@
 ;
 
 [duo]
-autopush = {{ duo_autopush|default:'no' }}
-failmode = {{ duo_failmode|default:'safe' }}
-fallback_local_ip = {{ duo_fallback_local_ip|default:'no' }}
+autopush = {{ duo_autopush|default('no') }}
+failmode = {{ duo_failmode|default('safe') }}
+fallback_local_ip = {{ duo_fallback_local_ip|default('no') }}
 host = {{ duo_api_hostname }}
-https_timeout = {{ duo_https_timeout|default:'0' }}
+https_timeout = {{ duo_https_timeout|default('0') }}
 ikey = {{ duo_integration_key }}
-motd = {{ duo_motd|default:'no' }}
-prompts = {{ duo_prompts|default:'3' }}
-pushinfo = {{ duo_pushinfo|default:'no' }}
+motd = {{ duo_motd|default('no') }}
+prompts = {{ duo_prompts|default('3') }}
+pushinfo = {{ duo_pushinfo|default('no') }}
 skey = {{ duo_secret_key }}
 
-{% if duo_groups %}
+{% if duo_groups is defined %}
 groups = {{ duo_groups }}
 {% endif %}
 
-{% if duo_http_proxy %}
+{% if duo_http_proxy is defined %}
 http_proxy = {{ duo_http_proxy }}
 {% endif %}
 
