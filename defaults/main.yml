@@ -9,7 +9,7 @@
 #   and passed in when the role is invoked
 duo_integration_key: "obtained-from-Duo"
 duo_secret_key: "obtained-from-Duo"
-duo_host: "{{ inventory_hostname }}"
+duo_api_hostname: ""
 
 
 

@@ -31,9 +31,9 @@ Secret key (like a password) obtained from the Duo Admin Panel.
 
     duo_secret_key: "obtained-from-Duo"
 
-The fully-qualified host name of the host.
+The fully-qualified domain name of the Duo server to communicate with.
 
-    duo_host: "{{ inventory_hostname }}"
+    duo_api_hostname: ""
 
 
 ### Implementation settings
@@ -132,7 +132,7 @@ More complicated example that specifies more parameters including specifying the
           vars:
              duo_integration_key: "{{ duo_integration_key_vaulted }}"
              duo_secret_key: "{{ duo_secret_key_vaulted }}"
-             duo_host: "secure.example.com"
+             duo_api_hostname: "secure.example.com"
              duo_autopush: yes
              duo_https_timeout: 60
              duo_groups: "!root"
