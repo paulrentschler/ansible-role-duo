@@ -63,9 +63,6 @@ duo_fallback_local_ip: "no"
 #   0 disables the timeout
 duo_https_timeout: "0"
 
-# When "yes", prints /etc/motd to the screen after successful login
-duo_motd: "no"
-
 # Maximum number of times Duo Unix will prompt the user to authenticate
 #   when the second factor fails
 duo_prompts: "3"
