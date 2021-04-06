@@ -1,17 +1,17 @@
 ---
 # Install and configure Duo Security two-factor authentication for SSH logins
 
-- name: add the Duo GPG key
-  ansible.builtin.apt_key:
-    url: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
-    state: present
-  become: yes
+# - name: add the Duo GPG key
+#   ansible.builtin.apt_key:
+#     url: https://duo.com/DUO-GPG-PUBLIC-KEY.asc
+#     state: present
+#   become: yes
 
-- name: add Duo source to apt
-  ansible.builtin.template:
-    src: duosecurity.list.j2
-    dest: /etc/apt/sources.list.d/duosecurity.list
-  become: yes
+# - name: add Duo source to apt
+#   ansible.builtin.template:
+#     src: duosecurity.list.j2
+#     dest: /etc/apt/sources.list.d/duosecurity.list
+#   become: yes
 
 - name: install prerequisites
   ansible.builtin.apt:
@@ -19,15 +19,63 @@
     state: present
     update_cache: yes
   loop:
+    - gcc
     - libssl-dev
     - libpam-dev
+    - make
   become: yes
 
-- name: install Duo Unix SSH integration
-  ansible.builtin.apt:
-    name: duo-unix
-    state: present
-    update_cache: yes
+# - name: install Duo Unix SSH integration
+#   ansible.builtin.apt:
+#     name: duo-unix
+#     state: present
+#     update_cache: yes
+#   become: yes
+
+- name: create the duo_unix build directory
+  ansible.builtin.file:
+    path: "/usr/local/src/duo_unix"
+    owner: "{{ devops_user }}"
+    group: "{{ devops_group }}"
+    mode: 0775
+    recurse: yes
+    state: directory
+  become: yes
+
+- name: extract the tarball
+  ansible.builtin.unarchive:
+    src: "https://dl.duosecurity.com/duo_unix-latest.tar.gz"
+    dest: "/usr/local/src/duo_unix"
+    remote_src: yes
+    creates: "/usr/local/src/duo_unix/duo_unix-*"
+    owner: "{{ devops_user }}"
+    group: "{{ devops_group }}"
+  become: yes
+
+- name: find the duo_unix package directory
+  ansible.builtin.find:
+    paths: "/usr/local/src/duo_unix"
+    patterns: "duo_unix-*"
+    file_type: directory
+  register: _duo_src_package_dir
+
+- name: configure the duo_unix package
+  ansible.builtin.command:
+    argv:
+      - ./configure
+      - --with-pam
+      - --prefix=/usr
+    chdir: "{{ _duo_src_package_dir.files.0.path }}"
+    creates: "{{ _duo_src_package_dir.files.0.path }}/config.status"
+
+- name: build the duo_unix package
+  community.general.make:
+    chdir: "{{ _duo_src_package_dir.files.0.path }}"
+
+- name: install the duo_unix package
+  community.general.make:
+    chdir: "{{ _duo_src_package_dir.files.0.path }}"
+    target: install
   become: yes
 
 - name: Duo configuration file
